@@ -1,0 +1,96 @@
+指针和引用总结
+指针的概念：指针的内存空间里存放的是要指向的内存的地址
+int a{100};
+int* pID{&a};		-int是设定要操作的内存大小，&是取地址符
+
+如果是两个不同数据类型的指针，则需要使用强制转换；虽然内存的地址都是4个字节（32位操作系统2³²=4字节，64位则是8字节）；这里的强制转换是考虑编译器要操作的内存大小，例如char你就只能够操作一个字节的空间。
+unsigned s{1001};
+int* pS{(int*)&s};
+
+常量指针
+const int num1{1001};
+const int* p1{&num1};			const指针只能修改指向的方向
+int* const p2{&num1};			指针const只能修改指向的值
+const int* const p3{&num1};	const指针const既不能修改方向，也不能修改值
+
+调用int类型常量num1的时候，它的值并不在那个地址里，而在其他不可修改内存里。
+
+
+指针数组
+int IDs[3]{1,2,3};
+int* pIDs[3]{};	-指针数组赋值用for循环赋值地址
+for(int x=0;x<3;x++)pIDs[x] = &IDs[x];
+二维数组的话赋值和一维数组基本一样，只是用两个嵌套for循环
+
+-指针数组赋值使用的第二种方法
+int*pIDs2{&IDs[0]};	-它指向的是数组第一个值的地址
+*（pIDs2+1）== IDs[1];
+int** p{&pIDs2};   -它指向了指针pIDs2的地址
+
+数组指针（行指针）-专门用于二维数组
+int a[2][2]{{1,2},{3,4}};			这里的a其实是一个数组指针
+a[0]是第一个数的内存地址
+定义一个数组指针
+int (*p4)[2]{&a} 或者 int (*p4)[2]{a[0]}
+
+动态的内存分配
+C语言的方法
+void* malloc(数量*大小)			这两种方法都是返回的void数据类型内存地址
+void* calloc(数量,大小)				free的时候会自动把指针的地址清零
+使用：动态分配4个int大小的内存空间给我们使用
+int* p1{(int*)malloc(4个int值*sizeof(int))}
+int* p2{(int*)alloc(4,sizeof(int))}
+这两个动态指针还有两个常用方法：
+realloc(p1,10)	重新分配10个int大小的内存空间给我们使用
+free(p1);p1=0;	清空p1指向的内存空间，然后把p1清零（避免悬挂指针的出现）
+
+C++语言的方法 
+int* p3 = new int;				定义并动态申请了一个int大小的内存空间
+int* p4 = new int[4];				定义并动态申请了四个int大小的内存空间
+
+清空分配的内存空间
+delete p3;				对应了new int
+delete[] p4;				对应了new int[4]
+
+内存复制
+memcpy(新指针，被复制额指针，数量*大小)
+将指定内存的每一个字节的值都设置为一个初始值
+memset(指针，初始值，数量*大小)
+引用的使用
+相当于一个别名
+int a{100};
+int& b{a};
+但是要注意：如果修改b，a的内存空间的值也会发生改变
+常量的用法一样：const int c{100};		const int& d{c};
+
+智能指针
+唯一指针
+std::unique_ptr<int> pRo{new int};
+std::unique_ptr<int[]> pRo{new int(5)};
+分配空间的另外一个方法：
+std::unique_ptr<int> pRo{std::make_unique<int>(5)}		//一个int空间，初始值为5
+std::unique_ptr<int[]> pRos{std::make_unique<int[]>(5)}	//分配了五个int空间
+方法：
+reset()		-将指针清零，并且将空间也清空
+get()		-获取它的地址，赋值给其他指针
+release()	-指针清零，空间不清空；会返回一个内存地址
+move()		-转移地址给其他唯一指针，指针清零
+共享指针
+std::shared_ptr<int> pEo{new int}
+std::shared_ptr<int[]> pEo{new int(5)}
+其他初始化方法：
+std::shared_ptr<int>pEo{std::make_shared<int>(5)}
+makeshared没有创建指针数组的方法，只能用new int(5)
+方法：
+指针.use_count()	-现在还有几个指针指向这个空间的指针数量
+指针.reset() 		-首先将当前共享指针地址设置为nullptr（0），然后会根据现指向的值来判断释放释放空间，如果只有最后一个共享指针指向这个空间才会把这段空间清空
+
+
+
+
+
+
+
+
+
+
